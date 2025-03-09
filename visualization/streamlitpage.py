@@ -1,5 +1,7 @@
 import streamlit as st
 import random
+import joblib
+
 #function
 #dictionaries
 mar_dict = {
@@ -138,11 +140,20 @@ immigration = st.radio(
     Are you a landed immigrant?", imm_dict.keys(),
     index=None
 )
-st.markdown("Once you have completed the survey, press this button to submit your information to the neural network.\
+
+knn_model = joblib.load("knn_model.pkl")
+
+
+st.markdown("Once you have completed the survey, press this button to submit your information to the KNN.\
             Let's see what mental disorders you are at risk of!")
 if None not in [gender, sex_ori, marital, immigration, lgbt, visible_minority]:
-    submit = st.button("Submit!", on_click=print(convert_all(marital, age, gender, lgbt, immigration, visible_minority)), disabled = False)
+    submit = st.button("Submit!", on_click=(convert_all(marital, age, gender, lgbt, immigration, visible_minority)), disabled = False)
+    # submit = st.button("Submit!", on_click=knn_model.predict((convert_all(marital, age, gender, lgbt, immigration, visible_minority))), disabled = False)
 st.header("Our Neural Model")
+
+# model_input = convert_all(marital, age, gender, lgbt, immigration, visible_minority)
+# knn_model = joblib.load("knn_model.pkl")
+
 
 st.header("Resources for Mental Health @ Ucalgary")
 st.write("Mental Health Services with the SU Wellness Center: \n https://www.ucalgary.ca/wellness-services/services/mental-health-services")
