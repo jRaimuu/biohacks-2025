@@ -1,2 +1,6 @@
 streamlit
 pandas
+tensorflow
+scikit-learn
+numpy
+imblearn
