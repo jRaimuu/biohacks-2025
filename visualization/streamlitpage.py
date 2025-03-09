@@ -38,15 +38,30 @@ lgbt_dict = {
 imm_dict = {
     "Yes":1,
     "No":2,
+
+}
+minority_dict = {
+    "White":6,
+    "South Asian":1,
+    "Chinese":2, 
+    "Black":3, 
+    "Filipino":4, 
+    "Arab":5, 
+    "Latin American":5, 
+    "Southeast Asian":5, 
+    "West Asian":5, 
+    "Korean":5, 
+    "Japanese":5,  
+    "White":6
 }
 vism_dict ={
     True:1,
     False:2
 }
-def convert_all(mar, age, gen, lgbt, imm, vism):
+def convert_all(mar, age, gen, lgbt, imm, min, vism):
     array = []
     print("\n\n\n\n")
-    print(mar, age, gen, lgbt, imm, vism)
+    print(mar, age, gen, lgbt, imm, min, vism)
     for i in age_dict.keys():
         if age in i:
             age = age_dict[i]
@@ -55,9 +70,12 @@ def convert_all(mar, age, gen, lgbt, imm, vism):
             gen = gen_dict["Or please specify,"]
         else:
             gen = gen_dict[gen]
-    if None not in [mar, age, gen, lgbt, imm, vism]:
-        print(f"mar {mar_dict[mar]} age {age} gen {gen} lgbt {lgbt_dict[lgbt]} imm {imm_dict[imm]} vism {vism_dict[vism]}")
-    return [mar_dict[mar], age, gen, lgbt_dict[lgbt], imm_dict[imm], vism_dict[vism]]
+    if min != []:
+        if min[0] in minority_dict.keys():
+            min = minority_dict[min[0]]
+    if None not in [mar, age, gen, lgbt, imm, min, vism]:
+        print(f"mar {mar_dict[mar]} age {age} gen {gen} lgbt {lgbt_dict[lgbt]} imm {imm_dict[imm]} min {min} vism {vism_dict[vism]}")
+    return [mar_dict[mar], age, gen, lgbt_dict[lgbt], imm_dict[imm], min, vism_dict[vism]]
 
 
 #main
@@ -95,7 +113,7 @@ gender = st.radio(
 #in case gender identity is non-binary
 if gender == "Or please specify,":
     gender = st.text_input("If please specify,", "")
-
+    
 sex_ori = st.radio(
     "What is your sexual orientation?",
     ["Heterosexual", "Gay or Lesbian", "Bisexual", "Or please specify,"],
@@ -114,8 +132,7 @@ else:
 st.markdown("Are you a member of any of the following visible minorities? Enter all that apply. ")
 minority = st.multiselect(
     "I am...",
-    ["White", "South Asian", "Chinese", "Black", "Filipino", "Arab", "Latin American", 
-    "Southeast Asian", "West Asian", "Korean", "Japanese",  "Other"], help = "Southeast Asian - "
+    minority_dict.keys(), help = "Southeast Asian - "
 )
 visible_minority = True
 if any(i in minority for i in ["White", "Arab", "West Asian"]):
@@ -140,8 +157,13 @@ immigration = st.radio(
 )
 st.markdown("Once you have completed the survey, press this button to submit your information to the neural network.\
             Let's see what mental disorders you are at risk of!")
-if None not in [gender, sex_ori, marital, immigration, lgbt, visible_minority]:
-    submit = st.button("Submit!", on_click=print(convert_all(marital, age, gender, lgbt, immigration, visible_minority)), disabled = False)
+
+def submit_function():
+    
+    convert_all(marital, age, gender, lgbt, immigration, minority, visible_minority)
+
+if None not in [gender, sex_ori, marital, immigration, lgbt, minority, visible_minority]:
+    submit = st.button("Submit!", on_click=submit_function(), disabled = False)
 st.header("Our Neural Model")
 
 st.header("Resources for Mental Health @ Ucalgary")
