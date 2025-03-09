@@ -162,7 +162,9 @@ st.markdown("Once you have completed the survey, press this button to submit you
             Let's see what mental disorders you are at risk of!")
 
 
-y_pred = None
+
+
+
 
 def submit_function():
     knn_model = joblib.load("knn_model.pkl")
@@ -175,18 +177,22 @@ def submit_function():
     test_model = pd.DataFrame([X_new], columns=features)
     print(f"Test model: {test_model}")
     y_pred = knn_model.predict(test_model)
-    print(y_pred)
+    return y_pred
 
+    
 
 if None not in [gender, sex_ori, marital, immigration, lgbt, minority]:
-    submit = st.button("Submit!", on_click=submit_function(), disabled = False)
-st.header("Our KNN Model")
-
-if y_pred != None:
-    if y_pred[0][0] is 1:
-        st.write(f"You are at HIGHER risk of Anxiety{y_pred}")
+    #submit = st.button("Submit!", on_click=submit_function())
+    y_pred = submit_function()
+    if y_pred[0][0] == 1.0:
+        st.header(f"You are at HIGHER risk of Anxiety")
     else:
-        st.write(f"You are at LOWER risk of Anxiety{y_pred}")
+        st.header(f"You are at LOWER risk of Anxiety")
+#if y_pred != None:
+        #y_pred_copy = y_pred
+        
+
+
 
 
 st.header("Resources for Mental Health @ Ucalgary")
