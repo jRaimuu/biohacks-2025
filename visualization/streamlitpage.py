@@ -1,6 +1,7 @@
 import streamlit as st
 import random
 import joblib
+import pandas as pd
 
 #function
 #dictionaries
@@ -40,15 +41,30 @@ lgbt_dict = {
 imm_dict = {
     "Yes":1,
     "No":2,
+
+}
+minority_dict = {
+    "White":6,
+    "South Asian":1,
+    "Chinese":2, 
+    "Black":3, 
+    "Filipino":4, 
+    "Arab":5, 
+    "Latin American":5, 
+    "Southeast Asian":5, 
+    "West Asian":5, 
+    "Korean":5, 
+    "Japanese":5,  
+    "White":6
 }
 vism_dict ={
     True:1,
     False:2
 }
-def convert_all(mar, age, gen, lgbt, imm, vism):
+def convert_all(mar, age, gen, lgbt, imm, min):
     array = []
     print("\n\n\n\n")
-    print(mar, age, gen, lgbt, imm, vism)
+    print(mar, age, gen, lgbt, imm, min)
     for i in age_dict.keys():
         if age in i:
             age = age_dict[i]
@@ -57,9 +73,12 @@ def convert_all(mar, age, gen, lgbt, imm, vism):
             gen = gen_dict["Or please specify,"]
         else:
             gen = gen_dict[gen]
-    if None not in [mar, age, gen, lgbt, imm, vism]:
-        print(f"mar {mar_dict[mar]} age {age} gen {gen} lgbt {lgbt_dict[lgbt]} imm {imm_dict[imm]} vism {vism_dict[vism]}")
-    return [mar_dict[mar], age, gen, lgbt_dict[lgbt], imm_dict[imm], vism_dict[vism]]
+    if min != []:
+        if min[0] in minority_dict.keys():
+            min = minority_dict[min[0]]
+    if None not in [mar, age, gen, lgbt, imm, min]:
+        print(f"mar {mar_dict[mar]} age {age} gen {gen} lgbt {lgbt_dict[lgbt]} imm {imm_dict[imm]} min {min}")
+    return [mar_dict[mar], age, gen, lgbt_dict[lgbt], imm_dict[imm], min]
 
 
 #main
@@ -97,7 +116,7 @@ gender = st.radio(
 #in case gender identity is non-binary
 if gender == "Or please specify,":
     gender = st.text_input("If please specify,", "")
-
+    
 sex_ori = st.radio(
     "What is your sexual orientation?",
     ["Heterosexual", "Gay or Lesbian", "Bisexual", "Or please specify,"],
@@ -116,8 +135,7 @@ else:
 st.markdown("Are you a member of any of the following visible minorities? Enter all that apply. ")
 minority = st.multiselect(
     "I am...",
-    ["White", "South Asian", "Chinese", "Black", "Filipino", "Arab", "Latin American", 
-    "Southeast Asian", "West Asian", "Korean", "Japanese",  "Other"], help = "Southeast Asian - "
+    minority_dict.keys(), help = "Southeast Asian - "
 )
 visible_minority = True
 if any(i in minority for i in ["White", "Arab", "West Asian"]):
@@ -140,19 +158,35 @@ immigration = st.radio(
     Are you a landed immigrant?", imm_dict.keys(),
     index=None
 )
-
-knn_model = joblib.load("knn_model.pkl")
-
-
-st.markdown("Once you have completed the survey, press this button to submit your information to the KNN.\
+st.markdown("Once you have completed the survey, press this button to submit your information to the neural network.\
             Let's see what mental disorders you are at risk of!")
-if None not in [gender, sex_ori, marital, immigration, lgbt, visible_minority]:
-    submit = st.button("Submit!", on_click=(convert_all(marital, age, gender, lgbt, immigration, visible_minority)), disabled = False)
-    # submit = st.button("Submit!", on_click=knn_model.predict((convert_all(marital, age, gender, lgbt, immigration, visible_minority))), disabled = False)
-st.header("Our Neural Model")
 
-# model_input = convert_all(marital, age, gender, lgbt, immigration, visible_minority)
-# knn_model = joblib.load("knn_model.pkl")
+
+y_pred = None
+
+def submit_function():
+    knn_model = joblib.load("knn_model.pkl")
+    X_new = convert_all(marital, age, gender, lgbt, immigration, minority)
+    print(f"X_NEW: {X_new}")
+    features = [
+    'Marital_Status', 'Age', 'Gender', 'LGBTQ2', 
+    'Immigration', 'Visible_Minority'
+    ]
+    test_model = pd.DataFrame([X_new], columns=features)
+    print(f"Test model: {test_model}")
+    y_pred = knn_model.predict(test_model)
+    print(y_pred)
+
+
+if None not in [gender, sex_ori, marital, immigration, lgbt, minority]:
+    submit = st.button("Submit!", on_click=submit_function(), disabled = False)
+st.header("Our KNN Model")
+
+if y_pred != None:
+    if y_pred[0][0] is 1:
+        st.write(f"You are at HIGHER risk of Anxiety{y_pred}")
+    else:
+        st.write(f"You are at LOWER risk of Anxiety{y_pred}")
 
 
 st.header("Resources for Mental Health @ Ucalgary")
