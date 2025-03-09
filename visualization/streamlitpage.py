@@ -1,5 +1,8 @@
 import streamlit as st
 import random
+import joblib
+import pandas as pd
+
 #function
 #dictionaries
 mar_dict = {
@@ -58,10 +61,10 @@ vism_dict ={
     True:1,
     False:2
 }
-def convert_all(mar, age, gen, lgbt, imm, min, vism):
+def convert_all(mar, age, gen, lgbt, imm, min):
     array = []
     print("\n\n\n\n")
-    print(mar, age, gen, lgbt, imm, min, vism)
+    print(mar, age, gen, lgbt, imm, min)
     for i in age_dict.keys():
         if age in i:
             age = age_dict[i]
@@ -73,9 +76,9 @@ def convert_all(mar, age, gen, lgbt, imm, min, vism):
     if min != []:
         if min[0] in minority_dict.keys():
             min = minority_dict[min[0]]
-    if None not in [mar, age, gen, lgbt, imm, min, vism]:
-        print(f"mar {mar_dict[mar]} age {age} gen {gen} lgbt {lgbt_dict[lgbt]} imm {imm_dict[imm]} min {min} vism {vism_dict[vism]}")
-    return [mar_dict[mar], age, gen, lgbt_dict[lgbt], imm_dict[imm], min, vism_dict[vism]]
+    if None not in [mar, age, gen, lgbt, imm, min]:
+        print(f"mar {mar_dict[mar]} age {age} gen {gen} lgbt {lgbt_dict[lgbt]} imm {imm_dict[imm]} min {min}")
+    return [mar_dict[mar], age, gen, lgbt_dict[lgbt], imm_dict[imm], min]
 
 
 #main
@@ -158,13 +161,33 @@ immigration = st.radio(
 st.markdown("Once you have completed the survey, press this button to submit your information to the neural network.\
             Let's see what mental disorders you are at risk of!")
 
-def submit_function():
-    
-    convert_all(marital, age, gender, lgbt, immigration, minority, visible_minority)
 
-if None not in [gender, sex_ori, marital, immigration, lgbt, minority, visible_minority]:
+y_pred = None
+
+def submit_function():
+    knn_model = joblib.load("knn_model.pkl")
+    X_new = convert_all(marital, age, gender, lgbt, immigration, minority)
+    print(f"X_NEW: {X_new}")
+    features = [
+    'Marital_Status', 'Age', 'Gender', 'LGBTQ2', 
+    'Immigration', 'Visible_Minority'
+    ]
+    test_model = pd.DataFrame([X_new], columns=features)
+    print(f"Test model: {test_model}")
+    y_pred = knn_model.predict(test_model)
+    print(y_pred)
+
+
+if None not in [gender, sex_ori, marital, immigration, lgbt, minority]:
     submit = st.button("Submit!", on_click=submit_function(), disabled = False)
-st.header("Our Neural Model")
+st.header("Our KNN Model")
+
+if y_pred != None:
+    if y_pred[0][0] is 1:
+        st.write(f"You are at HIGHER risk of Anxiety{y_pred}")
+    else:
+        st.write(f"You are at LOWER risk of Anxiety{y_pred}")
+
 
 st.header("Resources for Mental Health @ Ucalgary")
 st.write("Mental Health Services with the SU Wellness Center: \n https://www.ucalgary.ca/wellness-services/services/mental-health-services")
