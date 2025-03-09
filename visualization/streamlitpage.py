@@ -10,12 +10,12 @@ mar_dict = {
     "Widowed (and Not Living Common Law)":5,
     "Prefer Not To Say":99
 }
-pop_dict = {
-    "Rural area (less than1 ,000)":1,
-    "Small population centre (1,000 to 29,999)":2, 
-    "Medium population centre (30,000 to 99,999)":3, 
-    "Large urban population centre (100,000 or greater)":4
-}
+#pop_dict = {
+    #"Rural area (less than1 ,000)":1,
+    #"Small population centre (1,000 to 29,999)":2, 
+    #"Medium population centre (30,000 to 99,999)":3, 
+    #"Large urban population centre (100,000 or greater)":4
+#}
 age_dict = {
     (15, 19):1,
     (20, 24):2,
@@ -38,16 +38,15 @@ lgbt_dict = {
 imm_dict = {
     "Yes":1,
     "No":2,
-    "No Answer":9
 }
 vism_dict ={
     True:1,
     False:2
 }
-def convert_all(mar, pop, age, gen, lgbt, imm, vism):
+def convert_all(mar, age, gen, lgbt, imm, vism):
     array = []
     print("\n\n\n\n")
-    print(mar, pop, age, gen, lgbt, imm, vism)
+    print(mar, age, gen, lgbt, imm, vism)
     for i in age_dict.keys():
         if age in i:
             age = age_dict[i]
@@ -56,21 +55,21 @@ def convert_all(mar, pop, age, gen, lgbt, imm, vism):
             gen = gen_dict["Or please specify,"]
         else:
             gen = gen_dict[gen]
-    if None not in [mar, pop, age, gen, lgbt, imm, vism]:
-        print(f"mar {mar_dict[mar]} pop {pop_dict[pop]} age {age} gen {gen} lgbt {lgbt_dict[lgbt]} imm {imm_dict[imm]} vism {vism_dict[vism]}")
-    return [mar_dict[mar], pop_dict[pop], age, gen, lgbt_dict[lgbt], imm_dict[imm], vism_dict[vism]]
+    if None not in [mar, age, gen, lgbt, imm, vism]:
+        print(f"mar {mar_dict[mar]} age {age} gen {gen} lgbt {lgbt_dict[lgbt]} imm {imm_dict[imm]} vism {vism_dict[vism]}")
+    return [mar_dict[mar], age, gen, lgbt_dict[lgbt], imm_dict[imm], vism_dict[vism]]
 
 
 #main
 #title
-st.title("MindMappers Psychological Disorder Prediction Tool")
+st.title("MindMappers Anxiety Prediction Tool")
 
 #census section
 st.header("Let's get to know you... :eyes:")
-st.markdown("We'll ask you some questions that you might see on Canada's Mental Health and Access to Health Care Survey in 2032. We'll use our neural network to rank your probability of having each mental health issue. \
+st.markdown("We'll ask you some questions that you might see on Canada's Mental Health and Access to Health Care Survey in 2032. We'll use our neural network to rank your probability of having an anxiety disorder. \
              No data is collected because I don't have a webserver to store it...")
 st.subheader("Excerpt of Canada's Mental Health and Access to Health Care Survery (MHACS)")
-#CENSUS 
+#CENSUS
 
 #age
 age = st.slider("How old are you?", 0, 130, 25)
@@ -109,7 +108,7 @@ if sex_ori in ["Gay or Lesbian", "Bisexual", "Or please specify,"] or gender != 
     lgbt = True
 else:
     lgbt = False
-st.write(f"LGBT: {lgbt}")
+
 
 #visible minority
 st.markdown("Are you a member of any of the following visible minorities? Enter all that apply. ")
@@ -123,12 +122,12 @@ if any(i in minority for i in ["White", "Arab", "West Asian"]):
     visible_minority = False
 else:
     visible_minority = True
-st.write(f"Visibile Minority: {visible_minority}")
-population = st.radio(
-    "What is the population of the location where your primary residence is?",
-    pop_dict.keys(),
-    index=None
-)
+
+#population = st.radio(
+    #"What is the population of the location where your primary residence is?",
+    #pop_dict.keys(),
+   # index=None
+#)
 marital = st.radio(
     "What is your current marital status?", mar_dict.keys(),
      index=None
@@ -141,5 +140,10 @@ immigration = st.radio(
 )
 st.markdown("Once you have completed the survey, press this button to submit your information to the neural network.\
             Let's see what mental disorders you are at risk of!")
-if None not in [gender, sex_ori, population, marital, immigration, lgbt, visible_minority]:
-    submit = st.button("Submit!", on_click=print(convert_all(marital, population, age, gender, lgbt, immigration, visible_minority)), disabled = False)
+if None not in [gender, sex_ori, marital, immigration, lgbt, visible_minority]:
+    submit = st.button("Submit!", on_click=print(convert_all(marital, age, gender, lgbt, immigration, visible_minority)), disabled = False)
+st.header("Our Neural Model")
+
+st.header("Resources for Mental Health @ Ucalgary")
+st.write("Mental Health Services with the SU Wellness Center: \n https://www.ucalgary.ca/wellness-services/services/mental-health-services")
+st.markdown("Self Help and Online Mental Health Resources curated by Student Wellness Services: \nhttps://www.ucalgary.ca/wellness-services/resources")
