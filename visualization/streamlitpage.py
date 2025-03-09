@@ -1,4 +1,5 @@
 import streamlit as st
+import random
 #function
 #dictionaries
 mar_dict = {
@@ -25,15 +26,39 @@ age_dict = {
     (55, 64):7,
     (65, 130):8
 }
+gen_dict = {
+    "Man+":1,
+    "Woman+":2, 
+    "Or please specify,":[1,2]
+}
+lgbt_dict = {
+    True:1,
+    False:2
+}
+imm_dict = {
+    "Yes":1,
+    "No":2,
+    "No Answer":9
+}
+vism_dict ={
+    True:1,
+    False:2
+}
 def convert_all(mar, pop, age, gen, lgbt, imm, vism):
     array = []
     print("\n\n\n\n")
     print(mar, pop, age, gen, lgbt, imm, vism)
     for i in age_dict.keys():
-        
-    if None not in [mar, pop]:
-        print(f"mar {mar_dict[mar]} pop {pop_dict[pop]}")
-
+        if age in i:
+            age = age_dict[i]
+    if gen in gen_dict.keys():
+        if gen == "Or please specify,":
+            gen = gen_dict["Or please specify,"]
+        else:
+            gen = gen_dict[gen]
+    if None not in [mar, pop, age, gen, lgbt, imm, vism]:
+        print(f"mar {mar_dict[mar]} pop {pop_dict[pop]} age {age} gen {gen} lgbt {lgbt_dict[lgbt]} imm {imm_dict[imm]} vism {vism_dict[vism]}")
+    return [mar_dict[mar], pop_dict[pop], age, gen, lgbt_dict[lgbt], imm_dict[imm], vism_dict[vism]]
 
 
 #main
@@ -65,7 +90,7 @@ sex = st.radio(
 
 #reads gender
 gender = st.radio(
-    "What gender identity do you have?", ["Man+", "Woman+", "Transgender", "Or please specify,"],
+    "What gender identity do you have?", gen_dict.keys(),
     index=None
 )
 #in case gender identity is non-binary
@@ -93,14 +118,11 @@ minority = st.multiselect(
     ["White", "South Asian", "Chinese", "Black", "Filipino", "Arab", "Latin American", 
     "Southeast Asian", "West Asian", "Korean", "Japanese",  "Other"], help = "Southeast Asian - "
 )
-visible_minority = False
-
-for i in minority:
-    for j in ["white", "Arab", "West Asian"]:
-        if i == j:
-            visible_minority = False
-        else:
-            visible_minority = True
+visible_minority = True
+if any(i in minority for i in ["White", "Arab", "West Asian"]):
+    visible_minority = False
+else:
+    visible_minority = True
 st.write(f"Visibile Minority: {visible_minority}")
 population = st.radio(
     "What is the population of the location where your primary residence is?",
@@ -114,9 +136,10 @@ marital = st.radio(
 immigration = st.radio(
     "(A \"landed immigrant\" (permanent resident) \
     is a person who has been granted the right to live in Canada by immigration authorities. \n \
-    Are you a landed immigrant?", ["Yes", "No"],
+    Are you a landed immigrant?", imm_dict.keys(),
     index=None
 )
 st.markdown("Once you have completed the survey, press this button to submit your information to the neural network.\
             Let's see what mental disorders you are at risk of!")
-submit = st.button("Submit!", on_click=convert_all(marital, population, age, gender, lgbt, immigration, visible_minority))
+if None not in [gender, sex_ori, population, marital, immigration, lgbt, visible_minority]:
+    submit = st.button("Submit!", on_click=print(convert_all(marital, population, age, gender, lgbt, immigration, visible_minority)), disabled = False)
